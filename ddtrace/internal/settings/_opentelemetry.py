@@ -41,6 +41,12 @@ def _default_protocol(config: "ExporterConfig", signal_endpoint_env_var: str = "
 
 
 def _default_endpoint(config: "ExporterConfig", protocol: str, signal_path: str = "") -> str:
+    # Without a signal-specific endpoint, the OpenTelemetry SDK exporters derive it from the global
+    # endpoint: HTTP appends the signal path to it, and gRPC uses it as-is.
+    if global_endpoint := env.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        if protocol.lower() in ("http/json", "http/protobuf"):
+            return global_endpoint.rstrip("/") + signal_path
+        return global_endpoint
     if agentless_config.enabled and "OTEL_EXPORTER_OTLP_ENDPOINT" not in env:
         return _agentless_endpoint(signal_path)
     return ExporterConfig._get_default_endpoint(protocol, signal_path)
