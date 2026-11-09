@@ -1,0 +1,3 @@
+fixes:
+  - |
+    Profiling: The Profiler now properly ignores the exit signals that the application ignores.
