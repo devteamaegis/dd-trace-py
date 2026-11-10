@@ -14,6 +14,7 @@ from ddtrace.internal.settings._core import FLEET_CONFIG_IDS
 from ddtrace.internal.settings._core import LOCAL_CONFIG
 from ddtrace.internal.settings._core import DDConfig
 from ddtrace.internal.settings._otel_remapper import ENV_VAR_MAPPINGS
+from ddtrace.internal.settings._otel_remapper import NO_OVERRIDE
 from ddtrace.internal.settings._otel_remapper import SUPPORTED_OTEL_ENV_VARS
 from ddtrace.internal.settings._otel_remapper import parse_otel_env
 from ddtrace.internal.settings._supported_configurations import CONFIGURATION_ALIASES
@@ -80,6 +81,8 @@ def get_config(
     for otel_env_name in otel_envs:
         if otel_env_name in env:
             raw_val, parsed_val = parse_otel_env(otel_env_name)
+            if parsed_val == NO_OVERRIDE:
+                continue
             if parsed_val is not None:
                 val = parsed_val
                 if modifier:
