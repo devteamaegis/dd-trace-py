@@ -106,9 +106,9 @@ def test_register_on_exit_signal_exception_swallowed() -> None:
     os.kill(os.getpid(), signal.SIGTERM)
 
 
-@pytest.mark.subprocess(out="handler called\nstill alive\n")
+@pytest.mark.subprocess(out="still alive\n")
 def test_register_on_exit_signal_preserves_ignored_signal() -> None:
-    """A signal that the application ignores does not terminate the process after the handlers run."""
+    """A signal that the application ignores neither terminates the process nor runs the handlers."""
     import os
     import signal
 
@@ -120,6 +120,7 @@ def test_register_on_exit_signal_preserves_ignored_signal() -> None:
         print("handler called")
 
     atexit.register_on_exit_signal(handler)
+    assert signal.getsignal(signal.SIGTERM) is signal.SIG_IGN
     os.kill(os.getpid(), signal.SIGTERM)
     print("still alive")
 

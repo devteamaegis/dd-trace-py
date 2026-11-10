@@ -29,13 +29,17 @@ def handle_signal(sig, f):
     so no signals are overridden.
 
     For SIGTERM and SIGINT, automatically ensures the process exits after
-    all handlers complete by installing a base exit handler on first use,
-    unless the application ignores the signal.
+    all handlers complete by installing a base exit handler on first use.
+    If the application ignores SIGTERM or SIGINT, no handler is installed.
     """
     old_signal = signal.getsignal(sig)
 
+    # The process survives an ignored termination signal, so shutdown handlers must not run
+    if sig in (signal.SIGTERM, signal.SIGINT) and old_signal is signal.SIG_IGN:
+        return old_signal
+
     # For termination signals, ensure we have a base handler that will exit the process
-    if sig in (signal.SIGTERM, signal.SIGINT) and old_signal is not signal.SIG_IGN and not callable(old_signal):
+    if sig in (signal.SIGTERM, signal.SIGINT) and not callable(old_signal):
         _install_exit_handler(sig)
         old_signal = signal.getsignal(sig)
 
